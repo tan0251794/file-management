@@ -1,10 +1,10 @@
-package min.project.tms;
+package min.project.fms;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TmsApplicationTests {
+class FmsApplicationTests {
 
 	@Test
 	void contextLoads() {

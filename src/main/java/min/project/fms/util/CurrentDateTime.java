@@ -1,6 +1,5 @@
-package min.project.tms.methods;
+package min.project.fms.util;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
