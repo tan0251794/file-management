@@ -2,11 +2,16 @@ package min.project.fms.controller;
 
 import min.project.fms.dao.ItemMapper;
 import min.project.fms.model.*;
+import min.project.fms.util.FileUploader;
 import min.project.fms.util.RegexUtil;
 import min.project.fms.util.ResponseUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -16,8 +21,13 @@ import java.util.UUID;
 public class ItemController {
     private final ItemMapper itemMapper;
 
-    public ItemController(ItemMapper itemMapper) {
+    @Autowired
+    FileUploader fileUploader;
+
+    public ItemController(ItemMapper itemMapper, FileUploader fileUploader) {
+
         this.itemMapper = itemMapper;
+        this.fileUploader = fileUploader;
     }
 
     @GetMapping(value = "{itemUuid}/")
@@ -30,7 +40,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public Object upload(@RequestParam("file") MultipartFile file){
+    public Object upload(@RequestParam("file") MultipartFile file) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         String uuid = UUID.randomUUID().toString();
         Item item = new Item();
         item.setName(file.getOriginalFilename());
@@ -40,7 +50,8 @@ public class ItemController {
         item.setCreatedBy("Admin");
         item.setUpdatedBy("Admin");
 
-        itemMapper.saveItem(item);
+//        itemMapper.saveItem(item);
+        fileUploader.upload(file);
 
         Map<String, Object> response = new HashMap<>();
         response.put("uuid", item.getUuid());

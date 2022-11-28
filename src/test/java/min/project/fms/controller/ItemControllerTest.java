@@ -1,6 +1,7 @@
 package min.project.fms.controller;
 
 import min.project.fms.dao.ItemMapper;
+import min.project.fms.util.FileUploader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,10 +21,13 @@ class ItemControllerTest {
     @Mock
     ItemMapper itemMapper;
 
+    @Mock
+    FileUploader fileUploader;
+
     @BeforeEach
     public void setUp(){
         MockitoAnnotations.openMocks(this);
-        itemController = new ItemController(itemMapper);
+        itemController = new ItemController(itemMapper, fileUploader);
     }
 
     @Test

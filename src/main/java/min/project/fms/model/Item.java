@@ -1,6 +1,5 @@
 package min.project.fms.model;
 
-import net.bytebuddy.implementation.bind.annotation.Default;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 

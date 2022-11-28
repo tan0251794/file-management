@@ -12,10 +12,4 @@ public class RegexUtil {
     public static boolean isMatch(final String regex, final CharSequence input) {
         return input != null && input.length() > 0 && Pattern.matches(regex, input);
     }
-
-    public static void main(String[] args) {
-        // Test
-        boolean result = RegexUtil.isUuid("123e4567-e89b-12d3-a456-426614174000");
-        System.out.println(result);
-    }
 }

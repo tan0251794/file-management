@@ -1,44 +1,48 @@
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.UploadObjectArgs;
-import io.minio.errors.MinioException;
+package min.project.fms.util;
+
+import io.minio.*;
+import io.minio.errors.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Logger;
 
+@Component
 public class FileUploader {
-    public static void main(String[] args)
-            throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+
+    static final String BUCKET_NAME = "fms";
+    MinioClient minioClient =
+            MinioClient.builder()
+                    .endpoint("http://127.0.0.1:9000/")
+                    .credentials("minioadmin", "minioadmin")
+                    .build();
+
+    private void createBucketIfNotExist() throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         try {
-            // Create a minioClient with the MinIO server playground, its access key and secret key.
-            MinioClient minioClient =
-                    MinioClient.builder()
-                            .endpoint("https://play.min.io")
-                            .credentials("Q3AM3UQ867SPQQA43P2F", "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG")
-                            .build();
-
-            // Make 'asiatrip' bucket if not exist.
-            boolean found =
-                    minioClient.bucketExists(BucketExistsArgs.builder().bucket("asiatrip").build());
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET_NAME).build());
             if (!found) {
-                // Make a new bucket called 'asiatrip'.
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket("asiatrip").build());
-            } else {
-                System.out.println("Bucket 'asiatrip' already exists.");
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(BUCKET_NAME).build());
             }
-
-            // Upload '/home/user/Photos/asiaphotos.zip' as object name 'asiaphotos-2015.zip' to bucket
-            // 'asiatrip'.
-            minioClient.uploadObject(
-                    UploadObjectArgs.builder()
-                            .bucket("asiatrip")
-                            .object("asiaphotos-2015.zip")
-                            .filename("/home/user/Photos/asiaphotos.zip")
+        } catch (MinioException e) {
+            System.out.println("Error occurred: " + e);
+            System.out.println("HTTP trace: " + e.httpTrace());
+        }
+    }
+    public void upload(MultipartFile file) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        createBucketIfNotExist();
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder().bucket(BUCKET_NAME).object(file.getOriginalFilename())
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
                             .build());
-            System.out.println(
-                    "'/home/user/Photos/asiaphotos.zip' is successfully uploaded as "
-                            + "object 'asiaphotos-2015.zip' to bucket 'asiatrip'.");
         } catch (MinioException e) {
             System.out.println("Error occurred: " + e);
             System.out.println("HTTP trace: " + e.httpTrace());
