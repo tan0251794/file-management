@@ -22,5 +22,3 @@ services:
       - './data:/data'
     restart: unless-stopped
 ```
-
-Root user is (username: minioadmin / password: minioadmin)
