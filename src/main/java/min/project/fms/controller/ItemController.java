@@ -6,6 +6,7 @@ import min.project.fms.model.*;
 import min.project.fms.util.FileUploader;
 import min.project.fms.util.RegexUtil;
 import min.project.fms.util.ResponseUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,9 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static min.project.fms.util.Constant.MAX_UPLOAD_FILE_SIZE;
 
@@ -46,7 +45,9 @@ public class ItemController {
         if (item.getDeletedFlag()) {
             return ResponseUtil.fail(400, "File have been deleted");
         }
-        return ResponseUtil.ok(item);
+        ModelMapper mapper = new ModelMapper();
+        ItemRespDto itemRespDto = mapper.map(item, ItemRespDto.class);
+        return ResponseUtil.ok(itemRespDto);
     }
 
     @PostMapping
@@ -80,7 +81,7 @@ public class ItemController {
         return ResponseUtil.ok(response);
     }
 
-    @GetMapping(value = "download/{itemUuid}/")
+    @GetMapping(value = "{itemUuid}/download/")
     public Object download(@PathVariable("itemUuid") String itemUuid) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         if (!RegexUtil.isUuid(itemUuid)) {
             return ResponseUtil.fail(400, "uuid invalid");
@@ -96,6 +97,32 @@ public class ItemController {
 
         String url = fileUploader.getUrl(item.getStoragePathName());
         return ResponseUtil.ok(url);
+    }
+
+    @GetMapping(value = "download/")
+    public Object bulkDownload(@RequestParam("uuidList") List<String> uuidList) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+        for (String itemUuid: uuidList) {
+            if (!RegexUtil.isUuid(itemUuid)) {
+                return ResponseUtil.fail(400, "uuid invalid");
+            }
+        }
+
+        List<Item> items = itemMapper.findItemsByUuids(uuidList);
+
+        // Cannot get file have marked as deleted.
+        for (Item item: items) {
+            if (item.getDeletedFlag()) {
+                return ResponseUtil.fail(400, "Some of files have been deleted");
+            }
+        }
+
+        List<String> urls = new ArrayList<>();
+        for (Item item: items) {
+            String url = fileUploader.getUrl(item.getStoragePathName());
+            urls.add(url);
+        }
+
+        return ResponseUtil.ok(urls);
     }
 
     @DeleteMapping(value = "{itemUuid}/")

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.List;
 
 @Repository
 public class ItemMapperImpl implements ItemMapper {
@@ -30,5 +31,13 @@ public class ItemMapperImpl implements ItemMapper {
         em.createQuery("UPDATE Item SET deleted_flag = true WHERE id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
+    }
+
+    @Override
+    public List<Item> findItemsByUuids(List<String> uuidList) {
+        Query query = em.createQuery(
+                "SELECT item FROM Item item WHERE item.uuid IN :uuidList");
+        query.setParameter("uuidList", uuidList);
+        return (List<Item>) query.getResultList();
     }
 }

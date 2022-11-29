@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication(scanBasePackages = {"min.project.fms"})
 @RestController
 @EnableTransactionManagement
-@EnableScheduling
 @OpenAPIDefinition(info = @Info(title = "FMS API", version = "1.0", description = "File Management Service"))
 public class FmsApplication {
 	public static void main(String[] args) {
