@@ -26,8 +26,8 @@ public class ItemMapperImpl implements ItemMapper {
     }
 
     @Override
-    public void deleteById(Long id) {
-        em.createQuery("DELETE FROM Item item WHERE item.id = :id")
+    public void updateById(Long id) {
+        em.createQuery("UPDATE Item SET deleted_flag = true WHERE id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
     }

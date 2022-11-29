@@ -11,5 +11,5 @@ public interface ItemMapper {
     void saveItem(Item item);
 
     @Transactional
-    void deleteById(Long id);
+    void updateById(Long id);
 }

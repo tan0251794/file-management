@@ -1,5 +1,6 @@
 package min.project.fms.controller;
 
+import io.minio.errors.*;
 import min.project.fms.dao.ItemMapper;
 import min.project.fms.model.*;
 import min.project.fms.util.FileUploader;
@@ -15,6 +16,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static min.project.fms.util.Constant.MAX_UPLOAD_FILE_SIZE;
+
 
 @RestController
 @RequestMapping(path = "api/")
@@ -36,6 +40,12 @@ public class ItemController {
             return ResponseUtil.fail(400, "uuid invalid");
         }
         Item item = itemMapper.findByUuid(itemUuid);
+        if (item == null) {
+            return ResponseUtil.fail(400, String.format("uuid = %s is not found", itemUuid));
+        }
+        if (item.getDeletedFlag()) {
+            return ResponseUtil.fail(400, "File have been deleted");
+        }
         return ResponseUtil.ok(item);
     }
 
@@ -49,9 +59,18 @@ public class ItemController {
         item.setUuid(uuid);
         item.setCreatedBy("Admin");
         item.setUpdatedBy("Admin");
+        item.setStoragePathName(String.format("%s/%s", uuid, file.getOriginalFilename()));
 
-//        itemMapper.saveItem(item);
-        fileUploader.upload(file);
+        /*
+        * RULE:
+        * - Size of file must less than or equal 3 MB.
+        * */
+        if (file.getSize() > MAX_UPLOAD_FILE_SIZE) {
+            return ResponseUtil.fail(400, "File size too large");
+        }
+
+        itemMapper.saveItem(item);
+        fileUploader.upload(item.getStoragePathName(), file);
 
         Map<String, Object> response = new HashMap<>();
         response.put("uuid", item.getUuid());
@@ -62,12 +81,21 @@ public class ItemController {
     }
 
     @GetMapping(value = "download/{itemUuid}/")
-    public Object download(@PathVariable("itemUuid") String itemUuid) {
+    public Object download(@PathVariable("itemUuid") String itemUuid) throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
         if (!RegexUtil.isUuid(itemUuid)) {
             return ResponseUtil.fail(400, "uuid invalid");
         }
+
         Item item = itemMapper.findByUuid(itemUuid);
-        return ResponseUtil.ok(item);
+        if (item == null) {
+            return ResponseUtil.fail(400, String.format("uuid = %s is not found", itemUuid));
+        }
+        if (item.getDeletedFlag()) {
+            return ResponseUtil.fail(400, "File have been deleted");
+        }
+
+        String url = fileUploader.getUrl(item.getStoragePathName());
+        return ResponseUtil.ok(url);
     }
 
     @DeleteMapping(value = "{itemUuid}/")
@@ -81,7 +109,8 @@ public class ItemController {
             return ResponseUtil.fail(400, "item not existed");
         }
 
-        itemMapper.deleteById(item.getId());
+        // Just upload deleteFlag = true.
+        itemMapper.updateById(item.getId());
         return ResponseUtil.ok();
     }
 

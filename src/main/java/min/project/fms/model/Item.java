@@ -15,11 +15,12 @@ public class Item {
     private Long id;
 
     private String name;
+    private String storagePathName;
     private String uuid;
     private String contentType;
     private Integer size;
     @Column(columnDefinition = "boolean default false")
-    private Boolean deleredFlag = false;
+    private Boolean deletedFlag = false;
     private String createdBy;
     private String updatedBy;
 
@@ -28,6 +29,14 @@ public class Item {
 
     @UpdateTimestamp
     private Date updatedAt;
+
+    public String getStoragePathName() {
+        return storagePathName;
+    }
+
+    public void setStoragePathName(String storagePathName) {
+        this.storagePathName = storagePathName;
+    }
 
     public Long getId() {
         return id;
@@ -69,12 +78,12 @@ public class Item {
         this.size = size;
     }
 
-    public Boolean getDeleredFlag() {
-        return deleredFlag;
+    public Boolean getDeletedFlag() {
+        return deletedFlag;
     }
 
-    public void setDeleredFlag(Boolean deleredFlag) {
-        this.deleredFlag = deleredFlag;
+    public void setDeletedFlag(Boolean deletedFlag) {
+        this.deletedFlag = deletedFlag;
     }
 
     public String getCreatedBy() {
