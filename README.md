@@ -28,4 +28,6 @@ services:
 - stop: ``docker compose down``
 
 ** FILE-MANAGEMENT SERVER ** 
-- Default Adress: ``http://localhost:7001``
+- Default Address: ``http://localhost:7001``
+- APIs:
+    + ...
