@@ -135,6 +135,8 @@ public class ItemController {
         if (item == null) {
             return ResponseUtil.fail(400, "item not existed");
         }
+        
+        // @TODO: Delete file on minio server. 
 
         // Just upload deleteFlag = true.
         itemMapper.updateById(item.getId());
