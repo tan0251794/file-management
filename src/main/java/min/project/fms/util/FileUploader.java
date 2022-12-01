@@ -19,6 +19,8 @@ import static min.project.fms.util.Constant.*;
 
 @Component
 public class FileUploader {
+    
+    // @TODO: check optimize 
 
     private final Log logger = LogFactory.getLog(FileUploader.class);
     MinioClient minioClient =
