@@ -23,7 +23,6 @@ services:
     restart: unless-stopped
 ```
 
-- create folder /data and put this yml file to same level directory with folder /data .
 - start: ``docker compose up -d``
 - stop: ``docker compose down``
 
